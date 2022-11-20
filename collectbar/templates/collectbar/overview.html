@@ -1,0 +1,19 @@
+{% extends "collectbar/base.html" %}
+{% load static %}
+{% block content %}
+    <div class="plot" id="progressPlot"></div>
+    <div class="selector">
+        <label>Sektion auswählen</label>
+        <select v-model="selectedSection" :onchange="plotSection">
+            <option v-for="section in sections" :value="section.id">
+                ${section.name}
+            </option>
+        </select>
+        <div v-if="selectedSection">${plotSection(selectedSection)}</div>
+    </div>
+    <div class="plot" id="sectionPlot"></div>
+{% endblock content %}
+{% block scripts %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'main.js' %}" type="module"></script>
+{% endblock scripts %}

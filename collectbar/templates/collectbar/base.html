@@ -1,0 +1,28 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="de">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="{% static 'style.css' %}" />
+        <link rel="stylesheet"
+              href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css"
+              integrity="sha512-NhSC1YmyruXifcj/KFRWoC561YpHpc5Jtzgvbuzx5VozKpWvQ+4nXhPdFgmx8xqexRcpAglTj9sIBWINXa8x5w=="
+              crossorigin="anonymous"
+              referrerpolicy="no-referrer"/>
+        <title>{{ settings.SITE_TITLE }}
+            {% if page_title %}| {{ page_title }}{% endif %}
+        </title>
+    </head>
+    <body>
+        <main v-scope class="app" id="app">
+            {% block content %}
+            {% endblock content %}
+        </main>
+        <script src="https://cdn.plot.ly/plotly-2.16.1.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/danfojs@1.0.2/lib/bundle.min.js"></script>
+        <script src="https://unpkg.com/petite-vue@0.4.1/dist/petite-vue.iife.js"></script>
+        {% block scripts %}
+        {% endblock scripts %}
+    </body>
+</html>
