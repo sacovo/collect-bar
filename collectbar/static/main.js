@@ -16,14 +16,14 @@ const store = PetiteVue.reactive({
     ]).then(([goals, packages, sections]) => {
       this.sections = sections;
       this.selectedSection = sections[0].id;
-      this.goals = this.calculateData(goals);
-      this.packages = this.calculateData(packages);
+      this.goals = this.calculateData(goals, false);
+      this.packages = this.calculateData(packages, true);
       this.plotProgress();
     });
   },
 
 
-  calculateData(iter) {
+  calculateData(iter, sum) {
     let amounts = {};
     let dates = {}
     iter.forEach((element) => {
@@ -31,7 +31,7 @@ const store = PetiteVue.reactive({
         amounts[element.section_id] = [element.amount]
         dates[element.section_id] = [new Date(element.date)]
       } else {
-        amounts[element.section_id].push(amounts[element.section_id].at(-1) + element.amount)
+        amounts[element.section_id].push(element.amount + (sum ? amounts[element.section_id].at(-1) : 0))
         dates[element.section_id].push(new Date(element.date))
       }
     })
