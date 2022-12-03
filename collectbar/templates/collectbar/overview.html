@@ -1,6 +1,7 @@
 {% extends "collectbar/base.html" %}
 {% load static %}
 {% block content %}
+    <div class="progress">Total: ${collected} von ${total} gesammelt: ${percent}%</div>
     <div class="plot" id="progressPlot"></div>
     <div class="selector">
         <label>Sektion auswählen</label>

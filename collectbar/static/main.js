@@ -5,6 +5,9 @@ const store = PetiteVue.reactive({
   sections: [],
   goals: [],
   packages: [],
+  collected: 0,
+  total: 0,
+  percent: 0,
   selectedSection: null,
   date: new Date(),
 
@@ -18,6 +21,10 @@ const store = PetiteVue.reactive({
       this.selectedSection = sections[0].id;
       this.goals = this.calculateData(goals, false);
       this.packages = this.calculateData(packages, true);
+      let totalIdx = this.sections.find((value) => value.name === 'Sektionen Total').id
+      this.total = this.goals['amounts'][totalIdx].reduce((acc, cur) => acc + cur, 0);
+      this.collected = this.packages['amounts'][totalIdx].reduce((acc, cur) => acc + cur, 0);
+      this.percent = Math.round(this.collected / this.total * 1000) / 10;
       this.plotProgress();
     });
   },
@@ -44,12 +51,10 @@ const store = PetiteVue.reactive({
     return {amounts, dates}
   },
 
-  nextGoal(id) {
-    let goals = this.goals['dates'][id];
+  totalGoal(id) {
     let amounts = this.goals['amounts'][id];
-    let idx = goals.findIndex((elem) => elem > new Date());
 
-    return amounts.at(idx);
+    return amounts.reduce((acc, cur) => acc + cur, 0);
 
   },
 
@@ -76,22 +81,22 @@ const store = PetiteVue.reactive({
 
   plotProgress() {
     let trace_goals = {
-      y: this.sections.map((section) => section.name),
-      x: this.sections.map((section) => this.getGoal(section.id)),
+      y: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => section.name),
+      x: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => this.getGoal(section.id)),
       orientation: 'h',
       name: `Ziel (heute)`,
       type: "bar",
     }
     let next_goals = {
-      y: this.sections.map((section) => section.name),
-      x: this.sections.map((section) => this.nextGoal(section.id)),
+      y: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => section.name),
+      x: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => this.totalGoal(section.id)),
       orientation: 'h',
-      name: `Nächstes Ziel`,
+      name: `Quote`,
       type: "bar",
     }
     let trace_packages = {
-      y: this.sections.map((section) => section.name),
-      x: this.sections.map((section) => this.packages['amounts'][section.id].at(-1)),
+      y: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => section.name),
+      x: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => this.packages['amounts'][section.id].at(-1)),
       orientation: 'h',
       type: "bar",
       name: "Sammelstand",
@@ -100,7 +105,7 @@ const store = PetiteVue.reactive({
     Plotly.newPlot(
       'progressPlot',
       [trace_packages, trace_goals, next_goals].reverse(),
-      {barmode: 'group', height: "900", title: "Sammelstand"},
+      {barmode: 'group', height: "900", title: "Sammelstand", xaxis: {automargin: true}, yaxis: {automargin: true}},
     );
   },
 
