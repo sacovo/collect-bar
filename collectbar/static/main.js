@@ -18,12 +18,12 @@ const store = PetiteVue.reactive({
       get_sections(),
     ]).then(([goals, packages, sections]) => {
       this.sections = sections;
-      this.selectedSection = sections[0].id;
       this.goals = this.calculateData(goals, false);
       this.packages = this.calculateData(packages, true);
       let totalIdx = this.sections.find((value) => value.name === 'Sektionen Total').id
-      this.total = this.goals['amounts'][totalIdx].reduce((acc, cur) => acc + cur, 0);
-      this.collected = this.packages['amounts'][totalIdx].reduce((acc, cur) => acc + cur, 0);
+      this.selectedSection = totalIdx;
+      this.total = this.goals['amounts'][totalIdx].at(-1)
+      this.collected = this.packages['amounts'][totalIdx].at(-1);
       this.percent = Math.round(this.collected / this.total * 1000) / 10;
       this.plotProgress();
     });
@@ -52,10 +52,7 @@ const store = PetiteVue.reactive({
   },
 
   totalGoal(id) {
-    let amounts = this.goals['amounts'][id];
-
-    return amounts.reduce((acc, cur) => acc + cur, 0);
-
+    return this.goals['amounts'][id].at(-1);
   },
 
   getGoal(id) {
@@ -70,33 +67,28 @@ const store = PetiteVue.reactive({
       let today = new Date();
       let a = goals[idx - 1];
       let b = goals[idx];
-      console.log('b-a = ', b - a)
-      console.log('y_0 = ', amounts.at(idx - 1))
-      console.log('y_1 = ', amounts.at(idx))
-      console.log('dx', today - a)
-      console.log('dx', b - today)
       return Math.round((amounts.at(idx - 1) * (1 - (today - a) / (b - a))) + (amounts.at(idx) * (1 - (b - today) / (b - a))));
     }
   },
 
   plotProgress() {
     let trace_goals = {
-      y: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => section.name),
-      x: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => this.getGoal(section.id)),
+      y: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => section.name).reverse(),
+      x: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => this.getGoal(section.id)).reverse(),
       orientation: 'h',
       name: `Ziel (heute)`,
       type: "bar",
     }
     let next_goals = {
-      y: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => section.name),
-      x: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => this.totalGoal(section.id)),
+      y: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => section.name).reverse(),
+      x: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => this.totalGoal(section.id)).reverse(),
       orientation: 'h',
       name: `Quote`,
       type: "bar",
     }
     let trace_packages = {
-      y: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => section.name),
-      x: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => this.packages['amounts'][section.id].at(-1)),
+      y: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => section.name).reverse(),
+      x: this.sections.filter((value) => value.name !== 'Sektionen Total').map((section) => this.packages['amounts'][section.id].at(-1)).reverse(),
       orientation: 'h',
       type: "bar",
       name: "Sammelstand",
